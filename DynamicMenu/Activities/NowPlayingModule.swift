@@ -382,8 +382,15 @@ private struct AudioBars: View {
     private func height(of index: Int, at time: TimeInterval, full: CGFloat) -> CGFloat {
         guard module.isPlaying else { return Self.barWidth }
         let i = Double(index)
-        let wave = 0.5 + 0.3 * sin(time * (5.3 + i * 0.7) + i * 1.9)
+        let wave: Double
+        if let origin = DemoClock.waveOrigin {
+            // Recording for the website: one and two whole cycles per period.
+            let t = (time - origin.timeIntervalSinceReferenceDate) / DemoClock.wavePeriod * 2 * .pi
+            wave = 0.5 + 0.3 * sin(t + i * 1.9) + 0.2 * sin(2 * t + i * 0.6)
+        } else {
+            wave = 0.5 + 0.3 * sin(time * (5.3 + i * 0.7) + i * 1.9)
                        + 0.2 * sin(time * (8.9 - i * 0.5) + i * 0.6)
+        }
         return max(Self.barWidth, full * Self.envelope[index] * wave)
     }
 }

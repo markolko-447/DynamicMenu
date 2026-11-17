@@ -400,7 +400,7 @@ footer p { margin: 0 0 6px; }
 <script>
 (() => {
   const MEDIA = 'media';
-  const REV = '?r=19';   // bump after re-recording, so browsers fetch the new files
+  const REV = '?r=20';   // bump after re-recording, so browsers fetch the new files
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const touch = matchMedia('(pointer: coarse)').matches;
   const verb = text => touch ? text.replace(/\bClick\b/g, 'Tap') : text;
@@ -532,7 +532,21 @@ footer p { margin: 0 0 6px; }
     bezel.src = frames[next][0];
     bezel.setAttribute('height', frames[next][1]);
     const name = runs[next];
-    storyVideo.src = `${MEDIA}/clips/${name}/sequence.mp4${REV}`;
+    // A phone gets a light copy with a full picture every few frames, which it can
+    // jump around in at once, and holds the whole file before the scroll begins.
+    const light = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+    const file = `${MEDIA}/clips/${name}/sequence${light ? '-m' : ''}.mp4${REV}`;
+    if (light) {
+      try {
+        const blob = await fetch(file).then(r => r.blob());
+        if (device !== next) return;
+        if (storyVideo.dataset.blob) URL.revokeObjectURL(storyVideo.dataset.blob);
+        storyVideo.dataset.blob = URL.createObjectURL(blob);
+        storyVideo.src = storyVideo.dataset.blob;
+      } catch { storyVideo.src = file; }
+    } else {
+      storyVideo.src = file;
+    }
     const { duration, marks } = await fetch(`${MEDIA}/clips/${name}/sequence.json${REV}`).then(r => r.json());
     if (device !== next) return;   // switched again while this was loading
     // Each captioned state gets a scroll step the first time it appears; the

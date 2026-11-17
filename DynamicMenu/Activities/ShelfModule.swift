@@ -317,7 +317,6 @@ private struct ShelfGrid: View {
     let shelf: ShelfModule
 
     @Environment(\.pillInnerRadius) private var innerRadius
-    @Environment(\.isStillRender) private var isStillRender
 
     /// About this many items fit across the open pill.
     private static let perRow = 4
@@ -332,14 +331,7 @@ private struct ShelfGrid: View {
                     .transition(.scale(scale: 0.6).combined(with: .opacity))
             }
         }
-        Group {
-            // A scroll view is an AppKit view, which a still render leaves blank.
-            if isStillRender {
-                grid.frame(maxWidth: .infinity, alignment: .leading)
-            } else {
-                ScrollView(.horizontal, showsIndicators: false) { grid }
-            }
-        }
+        ScrollView(.horizontal, showsIndicators: false) { grid }
         .frame(height: CGFloat(rowCount) * ShelfItem.height + CGFloat(rowCount - 1) * 8)
         // Clip the scrolling edge with the same rounded corner as the items, so
         // a half-visible file is cut along a curve, not a straight line.
@@ -429,17 +421,6 @@ private struct ShelfItem: View {
                 Button("Show in Finder") { module.reveal(url) }
                 Button("Remove from Shelf") { module.remove(url) }
             }
-    }
-}
-
-// MARK: - Demo content (for the state renderer and --demo)
-
-extension ShelfModule {
-    static func demo(files: [URL]) -> ShelfModule {
-        let module = ShelfModule()
-        module.files = files
-        module.activeSince = .now
-        return module
     }
 }
 

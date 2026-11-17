@@ -141,12 +141,8 @@ private struct EventCountdown: View {
 
     var body: some View {
         TimelineView(.periodic(from: .distantPast, by: 1)) { context in
-            let now = DemoClock.date(context.date)
-            if let frozen = DemoClock.now, module.startDate > frozen {
-                let left = module.startDate.timeIntervalSince(frozen).rounded()
-                Text(Duration.seconds(left), format: .time(pattern: .minuteSecond))
-                    .monospacedDigit()
-            } else if module.startDate > now {
+            let now = context.date
+            if module.startDate > now {
                 Text(timerInterval: now...module.startDate, countsDown: true)
                     .monospacedDigit()
             } else {
@@ -159,14 +155,6 @@ private struct EventCountdown: View {
 private struct CalendarExpandedView: View {
     let module: CalendarModule
 
-    /// "9:48–10:18" for a recording, which shows its own clock in a fixed style.
-    private var recordedRange: String {
-        let format = DateFormatter()
-        format.dateFormat = "H:mm"
-        let shift = DemoClock.wallOffset
-        return "\(format.string(from: module.startDate.addingTimeInterval(shift)))–\(format.string(from: module.endDate.addingTimeInterval(shift)))"
-    }
-
     var body: some View {
         HStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 3) {
@@ -174,13 +162,7 @@ private struct CalendarExpandedView: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(.white)
                     .lineLimit(1)
-                Group {
-                    if DemoClock.wallOffset == 0 {
-                        Text(module.startDate...module.endDate)
-                    } else {
-                        Text(recordedRange)
-                    }
-                }
+                Text(module.startDate...module.endDate)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(.secondary)
                 if let location = module.location, module.joinURL == nil {
@@ -218,20 +200,5 @@ private struct CalendarExpandedView: View {
             .buttonStyle(.plain)
             .accessibilityLabel("Open in Calendar")
         }
-    }
-}
-
-// MARK: - Demo content (for the state renderer and --demo)
-
-extension CalendarModule {
-    static func demo(title: String, startsIn: TimeInterval, length: TimeInterval, joinURL: URL?) -> CalendarModule {
-        let module = CalendarModule()
-        module.title = title
-        module.startDate = .now.addingTimeInterval(startsIn)
-        module.endDate = module.startDate.addingTimeInterval(length)
-        module.joinURL = joinURL
-        module.isActive = true
-        module.activeSince = .now
-        return module
     }
 }

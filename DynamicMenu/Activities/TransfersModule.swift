@@ -27,8 +27,6 @@ final class TransfersModule: ActivityModule {
     @ObservationIgnored private var transfers: [Progress] = []
     @ObservationIgnored private var subscriber: Any?
     @ObservationIgnored private var sampleTask: Task<Void, Never>?
-    /// Moves the demo transfer along (see `startDemoProgress`).
-    @ObservationIgnored fileprivate var demoTask: Task<Void, Never>?
 
     func start() {
         guard subscriber == nil,
@@ -153,37 +151,5 @@ private struct TransferExpandedView: View {
                     .frame(height: 6)
             }
         }
-    }
-}
-
-// MARK: - Demo content (for the state renderer and --demo)
-
-extension TransfersModule {
-    /// Moves the demo transfer along, so a recording shows it arriving instead of
-    /// standing still at one number.
-    func startDemoProgress(from start: Double, to end: Double, over seconds: Double) {
-        demoTask?.cancel()
-        fraction = start
-        demoTask = Task { [weak self] in
-            let began = ContinuousClock.now
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .milliseconds(100))
-                let parts = began.duration(to: .now).components
-                let elapsed = Double(parts.seconds) + Double(parts.attoseconds) / 1e18
-                let t = min(1, elapsed / seconds)
-                self?.fraction = start + (end - start) * t
-                if t >= 1 { break }
-            }
-        }
-    }
-
-    static func demo(fileName: String, fraction: Double, airDrop: Bool) -> TransfersModule {
-        let module = TransfersModule()
-        module.fileName = fileName
-        module.fraction = fraction
-        module.isReceiving = airDrop
-        module.isActive = true
-        module.activeSince = .now
-        return module
     }
 }

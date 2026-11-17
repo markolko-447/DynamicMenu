@@ -382,15 +382,8 @@ private struct AudioBars: View {
     private func height(of index: Int, at time: TimeInterval, full: CGFloat) -> CGFloat {
         guard module.isPlaying else { return Self.barWidth }
         let i = Double(index)
-        let wave: Double
-        if let origin = DemoClock.waveOrigin {
-            // Recording for the website: one and two whole cycles per period.
-            let t = (time - origin.timeIntervalSinceReferenceDate) / DemoClock.wavePeriod * 2 * .pi
-            wave = 0.5 + 0.3 * sin(t + i * 1.9) + 0.2 * sin(2 * t + i * 0.6)
-        } else {
-            wave = 0.5 + 0.3 * sin(time * (5.3 + i * 0.7) + i * 1.9)
+        let wave = 0.5 + 0.3 * sin(time * (5.3 + i * 0.7) + i * 1.9)
                        + 0.2 * sin(time * (8.9 - i * 0.5) + i * 0.6)
-        }
         return max(Self.barWidth, full * Self.envelope[index] * wave)
     }
 }
@@ -523,7 +516,7 @@ private struct Scrubber: View {
     var body: some View {
         TimelineView(.periodic(from: .distantPast, by: 0.5)) { context in
             let duration = module.duration
-            let position = dragFraction.map { $0 * duration } ?? module.position(at: DemoClock.date(context.date))
+            let position = dragFraction.map { $0 * duration } ?? module.position(at: context.date)
             let fraction = duration > 0 ? position / duration : 0
 
             HStack(spacing: 8) {
@@ -700,31 +693,5 @@ nonisolated final class NowPlayingBridge: @unchecked Sendable {
         DispatchQueue.global().asyncAfter(deadline: .now() + 5) { [weak self] in
             self?.launch()
         }
-    }
-}
-
-// MARK: - Demo content (for the state renderer and --demo)
-
-extension NowPlayingModule {
-    /// Demo sessions hold their center weakly, so keep one alive for them.
-    private static let demoCenter = MediaCenter()
-
-    /// A session with fixed content. `artwork` is PNG data.
-    static func demo(app: String, title: String, artist: String, artwork: Data?,
-                     playing: Bool, duration: TimeInterval, position: TimeInterval) -> NowPlayingModule {
-        let module = NowPlayingModule(app: app, center: demoCenter)
-        module.title = title
-        module.artist = artist
-        module.artwork = artwork.flatMap(NSImage.init(data:))
-        module.tint = artwork.flatMap(ArtworkColor.tint(of:)) ?? .white
-        module.isPlaying = playing
-        module.duration = duration
-        module.positionAnchor = position
-        module.anchorDate = .now
-        module.supportsRating = app == "com.apple.Music"
-        module.isFavorite = module.supportsRating
-        module.isActive = true
-        module.activeSince = .now
-        return module
     }
 }

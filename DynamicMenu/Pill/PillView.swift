@@ -11,15 +11,11 @@ struct PillView: View {
     let model: PillModel
     private var activities = ActivityCenter.shared
     private var settings = AppearanceSettings.shared
-    /// Still images cannot run the fluid layer's shader, so they go without it.
-    @Environment(\.isStillRender) private var isStillRender
     /// How far the blobs of the fluid layer reach to each other right now. It
     /// is wide as a bubble appears or leaves, so the neck lasts through the
     /// pull-off, and settles to a short reach, so bubbles at rest stay apart.
     @State private var fluidReach: CGFloat = PillView.restingReach
     private var fileDrag = FileDragMonitor.shared
-    /// Scripted content for the state renderer and --demo; nil otherwise.
-    private var demo = DemoStage.shared
 
     /// Measured content sizes; the pill is sized around them.
     /// How far the pointer has dragged the pill from rest.
@@ -42,7 +38,7 @@ struct PillView: View {
     }
 
     var body: some View {
-        let active = demo.isRunning ? demo.active : activities.active
+        let active = activities.active
         let primary = active.first
         // Bubbles beside the pill only: a notch shows one activity at a time.
         let secondary = active.count > 1 && model.style.isPill ? active[1] : nil
@@ -50,8 +46,7 @@ struct PillView: View {
         // playing, so the drop has a large target instead of the small pill.
         // Also opened by a file drag that reaches the pill without the early
         // detector having seen it start (the Dock prepares its drag ahead of time).
-        let showsDropZone = demo.isRunning ? demo.showsDropZone
-            : shelf.draggingOut == nil && (isDropZoneOpen || model.isDropTargeted || isDropHeld)
+        let showsDropZone = shelf.draggingOut == nil && (isDropZoneOpen || model.isDropTargeted || isDropHeld)
         // While the pill is coming back from its idle dot, it stays a dot
         // until the dot has reappeared; then it grows into the activity.
         let presentation: PillPresentation = model.idlePhase != .pill ? .idle
@@ -72,8 +67,7 @@ struct PillView: View {
         ZStack(alignment: .top) {
             // Only while a bubble is out or just leaving: on its own the pill
             // is already crisp, and the blurred copy only fringed its edges.
-            if presentation == .compact, !isStillRender, !ProcessInfo.processInfo.arguments.contains("--no-fluid"),
-               secondary != nil || (model.style.isPill && active.count > 2) || fluidReach > Self.restingReach + 0.05 {
+            if presentation == .compact, secondary != nil || (model.style.isPill && active.count > 2) || fluidReach > Self.restingReach + 0.05 {
                 fluidLayer(metrics: metrics, shape: shape, active: active, secondary: secondary,
                            raised: isRaised, appearance: appearance, isNotch: isNotch, stretch: stretch)
             }
@@ -177,9 +171,6 @@ struct PillView: View {
                 }
             }
         }
-        .onChange(of: demo.expandedID) { _, id in
-            if let id { model.open(focus: id) } else { model.collapse() }
-        }
         .onChange(of: fileDrag.location) { updateDropZone() }
         .onChange(of: fileDrag.isDragging) { updateDropZone() }
         .onChange(of: showsDropZone) { _, shows in
@@ -193,8 +184,7 @@ struct PillView: View {
         .onChange(of: AppSettings.shared.hidesIdlePill) { model.updateIdle(active.isEmpty) }
     }
 
-    /// The shelf shown in the drop zone: the demo's while a demo runs.
-    private var shelf: ShelfModule { demo.isRunning ? demo.shelf : activities.shelf }
+    private var shelf: ShelfModule { activities.shelf }
 
     private func updateDropZone() {
         // A file being dragged out of the shelf starts right at the pill; the

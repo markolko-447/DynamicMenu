@@ -194,15 +194,3 @@ private struct PrivacyExpandedView: View {
         }
     }
 }
-
-// MARK: - Demo content (for the state renderer and --demo)
-
-extension PrivacyModule {
-    static func demo(camera: Bool, microphone: Bool) -> PrivacyModule {
-        let module = PrivacyModule()
-        module.cameraInUse = camera
-        module.microphoneInUse = microphone
-        module.activeSince = .now
-        return module
-    }
-}

@@ -172,17 +172,3 @@ private struct BatteryExpandedView: View {
         }
     }
 }
-
-// MARK: - Demo content (for the state renderer and --demo)
-
-extension BatteryModule {
-    static func demo(percent: Int, pluggedIn: Bool) -> BatteryModule {
-        let module = BatteryModule()
-        module.percent = percent
-        module.isPluggedIn = pluggedIn
-        module.isCharging = pluggedIn
-        module.isActive = true
-        module.activeSince = .now
-        return module
-    }
-}

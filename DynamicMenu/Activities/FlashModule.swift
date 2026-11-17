@@ -140,16 +140,3 @@ struct LevelBar: View {
             .accessibilityValue(Text(level, format: .percent.precision(.fractionLength(0))))
     }
 }
-
-// MARK: - Demo content (for the state renderer and --demo)
-
-extension FlashModule {
-    /// Shows `flash` until released, whatever the alert settings say.
-    static func demo(_ flash: Flash) -> FlashModule {
-        let module = FlashModule()
-        module.current = flash
-        module.isActive = true
-        module.activeSince = .now
-        return module
-    }
-}

@@ -148,12 +148,7 @@ private struct TimerReadout: View {
     let module: TimerModule
 
     var body: some View {
-        if let end = module.end, let frozen = DemoClock.now {
-            // Stopped time, for recordings: the same digits in every frame.
-            let left = max(0, end.timeIntervalSince(frozen).rounded())
-            Text(Duration.seconds(left), format: .time(pattern: left >= 3600 ? .hourMinuteSecond : .minuteSecond))
-                .monospacedDigit()
-        } else if let end = module.end {
+        if let end = module.end {
             Text(timerInterval: Date.now...max(end, .now), countsDown: true)
                 .monospacedDigit()
         } else if let remaining = module.pausedRemaining {
@@ -194,16 +189,5 @@ private struct TimerExpandedView: View {
             .buttonStyle(.plain)
             .accessibilityLabel("Open Clock")
         }
-    }
-}
-
-// MARK: - Demo content (for the state renderer and --demo)
-
-extension TimerModule {
-    static func demo(remaining: TimeInterval) -> TimerModule {
-        let module = TimerModule()
-        module.end = .now.addingTimeInterval(remaining)
-        module.activeSince = .now
-        return module
     }
 }

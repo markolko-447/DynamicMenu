@@ -24,49 +24,10 @@ struct DynamicMenuApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        let arguments = ProcessInfo.processInfo.arguments
-        if let index = arguments.firstIndex(of: "--render-states") {
-            let path = index + 1 < arguments.count && !arguments[index + 1].hasPrefix("-")
-                ? arguments[index + 1] : "~/Desktop/DynamicMenu States"
-            let folder = URL(fileURLWithPath: (path as NSString).expandingTildeInPath)
-            Task { await StateRenderer.run(to: folder) }
-            return
-        }
-        if let index = arguments.firstIndex(of: "--render-clips") {
-            let path = index + 1 < arguments.count && !arguments[index + 1].hasPrefix("-")
-                ? arguments[index + 1] : "~/Desktop/DynamicMenu Clips"
-            let folder = URL(fileURLWithPath: (path as NSString).expandingTildeInPath)
-            if let wallpaper = arguments.firstIndex(of: "--wallpaper"), wallpaper + 1 < arguments.count {
-                let path = (arguments[wallpaper + 1] as NSString).expandingTildeInPath
-                ClipBackdrop.wallpaper = NSImage(contentsOfFile: path)
-            }
-            // --story-wallpaper: the scroll section's own wallpaper.
-            if let story = arguments.firstIndex(of: "--story-wallpaper"), story + 1 < arguments.count {
-                let path = (arguments[story + 1] as NSString).expandingTildeInPath
-                ClipBackdrop.storyWallpaper = NSImage(contentsOfFile: path)
-            }
-            ClipRenderer.stillsOnly = arguments.contains("--stills-only")
-            if let i = arguments.firstIndex(of: "--pair"), i + 1 < arguments.count {
-                let parts = arguments[i + 1].split(separator: ":").map(String.init)
-                if parts.count == 2 { ClipRenderer.pair = (parts[0], parts[1]) }
-            }
-            ClipRenderer.notch = arguments.contains("--notch")
-            if let i = arguments.firstIndex(of: "--look"), i + 1 < arguments.count,
-               let look = PillAppearance(rawValue: arguments[i + 1]) {
-                ClipRenderer.look = look
-            }
-            if let stages = arguments.firstIndex(of: "--stages"), stages + 1 < arguments.count {
-                ClipRenderer.onlyStages = Set(arguments[stages + 1].split(separator: ",").map(String.init))
-            }
-            Task { await ClipRenderer.run(to: folder) }
-            return
-        }
-
         ActivityCenter.shared.start()
         FileDragMonitor.shared.start()
         ScreenManager.shared.start()
         showPermissionsOnFirstLaunch()
-        if arguments.contains("--demo") { DemoLoop.start() }
     }
 
     /// On a new Mac, open Settings on the Permissions page so everything the app

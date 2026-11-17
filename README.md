@@ -178,17 +178,8 @@ The site at **https://markolko-447.github.io/DynamicMenu/** is the `website` fol
 `.github/workflows/pages.yml` publishes it to GitHub Pages whenever it changes on `main`. It is
 plain HTML with no build step. Serve the folder with any static web server to preview it.
 
-The pill in its videos is the app itself. To re-record them, give DynamicMenu Screen Recording
-access and run it with
-
-```sh
-DynamicMenu.app/Contents/MacOS/DynamicMenu --render-clips ./out --wallpaper hero.webp \
-    --story-wallpaper story.webp --stages hero,story,story-notch
-```
-
-then copy the clips into `website/media` and bump the version number in `website/index.html`.
-The recordings show a fixed clock, Tuesday 17 November at 9:40, so a calendar event always reads
-the same. See `DynamicMenu/Demo/ClipRenderer.swift` for the other options.
+The pill in its videos is the app itself, recorded with a fixed clock so a calendar event always
+reads the same.
 
 The code is MIT. The two wallpapers in `website/assets` are not part of that license. One is the
 author's own, and the other is a photo from [Pixabay](https://pixabay.com/) used under its license.
@@ -201,16 +192,14 @@ author's own, and the other is a photo from [Pixabay](https://pixabay.com/) used
 | `DynamicMenu/Activities` | One module for each kind of activity |
 | `DynamicMenu/Screens` | Finding displays, the notch, and menu bar space |
 | `DynamicMenu/Settings` | Settings and permissions |
-| `DynamicMenu/Demo` | The recorder that renders the pill's real animations to video |
 | `Docs` | The activity API for other apps |
 | `website` | The website, published with GitHub Pages |
 
 ## Contributing
 
 Issues and pull requests are welcome. Please keep to the existing style, describe what
-changed and why, and say how you checked it. Anything that moves the pill should be looked
-at in a recording (`--render-clips`, see `DynamicMenu/Demo/ClipRenderer.swift`), not only in
-a screenshot.
+changed and why, and say how you checked it. Anything that moves the pill should be watched
+running, not only looked at in a screenshot.
 
 ## License
 

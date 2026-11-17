@@ -51,9 +51,9 @@ enum ProtectedFolder: String, CaseIterable, Hashable {
 
     var purpose: String {
         switch self {
-        case .downloads: "Download and AirDrop progress, and shelf files from Downloads or its Dock stack."
-        case .desktop: "Shelf files you drop from the Desktop."
-        case .documents: "Shelf files you drop from Documents."
+        case .downloads: "Lets DynamicMenu follow downloads and AirDrop, and accept shelf files from Downloads."
+        case .desktop: "Lets the shelf accept files dropped from the Desktop."
+        case .documents: "Lets the shelf accept files dropped from Documents."
         }
     }
 
@@ -109,13 +109,13 @@ enum Permission: Hashable, Identifiable {
 
     var purpose: String {
         switch self {
-        case .calendars: "Shows your next event shortly before it starts."
+        case .calendars: "Lets DynamicMenu show your next event shortly before it starts."
         case .folder(let folder): folder.purpose
         case .automation(let app):
             app == Permissions.musicBundleID
-                ? "Favourite and Suggest Less for songs in Music."
-                : "Controls \(Self.appName(app)) from the pill."
-        case .loginItem: "Starts DynamicMenu when you log in."
+                ? "Lets you add songs to Favourites or Suggest Less from the pill."
+                : "Lets you control \(Self.appName(app)) from the pill."
+        case .loginItem: "Opens DynamicMenu automatically when you log in."
         }
     }
 

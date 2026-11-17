@@ -51,14 +51,14 @@ private struct GeneralSettings: View {
                 Toggle("Haptic Feedback", isOn: $settings.hapticsEnabled)
                 Toggle(isOn: $settings.hidesIdlePill) {
                     Text("Hide Pill When Idle")
-                    Text("On external displays, the pill draws in to a dot and disappears while nothing is running, and returns when something starts.")
+                    Text("On external displays, the pill shrinks away while there is nothing to show and returns when an activity starts.")
                 }
             }
 
             Section {
                 Toggle(isOn: $settings.reservesMenuBarSpace) {
                     Text("Reserve Menu Bar Space")
-                    Text("On a notch, keeps menu bar icons from sitting under the pill while an activity is showing. Apps' own menus on the left can't be reserved for.")
+                    Text("On a Mac with a notch, keeps menu bar icons from sitting under the pill while an activity is showing. This does not apply to the menus of the frontmost app.")
                 }
             }
 
@@ -85,19 +85,14 @@ private struct ActivitySettings: View {
                         get: { settings.isEnabled(kind) },
                         set: { settings.setEnabled(kind, $0) }
                     )) {
-                        Label {
-                            Text(kind.label)
-                            Text(kind.detail)
-                        } icon: {
-                            Image(systemName: kind.symbol)
-                        }
+                        Label(kind.label, systemImage: kind.symbol)
                     }
                 }
             }
 
             Section {
                 if apps.entries.isEmpty {
-                    Text("Apps that send activities to DynamicMenu appear here the first time they do.")
+                    Text("Apps appear here the first time they send an activity to DynamicMenu.")
                         .foregroundStyle(.secondary)
                 }
                 ForEach(apps.entries) { app in
@@ -105,20 +100,14 @@ private struct ActivitySettings: View {
                         get: { app.important },
                         set: { apps.setImportant($0, for: app.id) }
                     )) {
-                        Label {
-                            Text(app.name)
-                            Text(app.important ? "Important: shown in the pill, above music"
-                                               : "Shown beside the pill")
-                        } icon: {
-                            Image(systemName: app.symbol)
-                        }
+                        Label(app.name, systemImage: app.symbol)
                     }
                     .contextMenu { Button("Forget \(app.name)") { apps.forget(app.id) } }
                 }
             } header: {
                 Text("Apps")
             } footer: {
-                Text("An important app takes the main pill, above Now Playing. Others show beside it.")
+                Text("An app marked as important takes higher priority.")
             }
 
             Section("Alerts") {
@@ -165,10 +154,6 @@ private struct DisplaySettings: View {
                 } header: {
                     Label(display.name, systemImage: display.detected == .plain ? "display" : "laptopcomputer")
                 }
-            }
-            Section {
-            } footer: {
-                Text("Automatic uses the notch on a built-in display that has one, a pill everywhere else, and stays off a display that already shows Apple's own pill. Glass is for pills; a notch has to stay black to meet the camera housing.")
             }
         }
         .formStyle(.grouped)
@@ -230,15 +215,13 @@ private struct ShelfSettings: View {
             Section {
                 Toggle("Keep Files After Dragging Out", isOn: $shelf.keepsFilesAfterDragOut)
             } footer: {
-                Text("When off, a file leaves the shelf once you drop it in another app. Dropping it back on the pill or cancelling the drag keeps it.")
+                Text("When off, a file is removed from the shelf once it is placed into another app.")
             }
 
             Section {
                 LabeledContent("Files on Shelf", value: "\(shelf.files.count)")
                 Button("Clear Shelf", role: .destructive) { shelf.clear() }
                     .disabled(shelf.files.isEmpty)
-            } footer: {
-                Text("Files from Finder stay where they are; the shelf only remembers them. Content from Mail, Photos or a web page is copied, and the copy is deleted when it leaves the shelf.")
             }
         }
         .formStyle(.grouped)
@@ -252,10 +235,6 @@ private struct PermissionSettings: View {
 
     var body: some View {
         Form {
-            Section {
-                Text("Everything DynamicMenu needs, and what each one is for. Allow the ones for the features you use.")
-                    .foregroundStyle(.secondary)
-            }
             ForEach(permissions.sections, id: \.title) { section in
                 if !section.items.isEmpty {
                     Section(section.title) {
@@ -267,7 +246,7 @@ private struct PermissionSettings: View {
             }
             Section {
             } footer: {
-                Text("Some permissions can only be changed in System Settings. This page updates when you come back.")
+                Text("Some permissions can only be changed in System Settings. This page updates when you return.")
             }
         }
         .formStyle(.grouped)
@@ -302,12 +281,7 @@ private struct PermissionRow: View {
                     .background(.blue.gradient, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
             }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(permission.title)
-                Text(permission.purpose)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            Text(permission.title)
 
             Spacer(minLength: 8)
 

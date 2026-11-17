@@ -31,14 +31,14 @@ enum ActivityKind: String, CaseIterable, Identifiable {
 
     var detail: String {
         switch self {
-        case .media: "Music, Spotify, videos in the browser and any other player."
+        case .media: "Music, podcasts and video from any app or browser tab."
         case .timers: "Timers you start in the Clock app."
-        case .calendar: "Your next event, shortly before it starts."
-        case .battery: "Charger connected or removed, and low battery."
-        case .privacy: "While any app uses the camera or microphone."
-        case .transfers: "Progress of files arriving in Downloads."
-        case .shelf: "Files you drop on the pill to use later."
-        case .apps: "Activities other Mac apps send to DynamicMenu."
+        case .calendar: "Your next event, shown shortly before it starts."
+        case .battery: "Charger connections and low battery warnings."
+        case .privacy: "Shown whenever an app is using the camera or microphone."
+        case .transfers: "Progress of downloads and AirDrop transfers."
+        case .shelf: "A place to keep files you drop on the pill."
+        case .apps: "Activities that other apps send to DynamicMenu."
         }
     }
 

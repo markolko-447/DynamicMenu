@@ -4,9 +4,11 @@
 
 Music, timers, meetings and files right in your menu bar.
 
-On a Mac with a notch, it grows out of the notch. On any other display, it floats at the top of
-the screen as a small black pill. Free and open source under the [MIT license](LICENSE), for
-macOS 26 or later.
+On a Mac with a notch, it grows out of the notch. On any other display it floats at the top
+as a small black pill. Free and open source under the [MIT license](LICENSE), for macOS 26
+or later.
+
+![DynamicMenu in the menu bar](Docs/media/preview.gif)
 
 **[See it in motion](https://markolko-447.github.io/DynamicMenu/)**
 
@@ -44,28 +46,14 @@ It takes a few lines of code (see below).
 
 ## Pill or notch
 
-DynamicMenu chooses for you. A Mac with a notch gets the notch version, which shows one
-activity at a time. Every other display, including external monitors and Macs without a notch,
-gets a floating pill, and the second and third activities sit beside it as bubbles.
-
-## What comes first
-
-When several things are going on, the most important one takes the pill. The order is a
-finished timer, battery, small alerts, third party apps you marked as important, Now Playing,
-downloads, a running timer, the calendar, other third party apps, the shelf, and last the
-camera and microphone.
-
-## Make it yours
-
-In Settings you can switch each kind of activity on or off, choose Solid, Gradient or Glass for
-each display (Glass is for displays without a notch), and mark which third party apps are
-important. Apps appear in that list the first time they send an activity.
+A Mac with a notch gets the notch, which shows one activity at a time. Every other display gets a
+floating pill, with a second and third activity beside it as bubbles. In Settings you can switch
+each activity on or off, choose Solid, Gradient or Glass per display, and mark third party apps
+as important.
 
 ## Privacy
 
-Everything stays on your Mac. DynamicMenu reads your calendar, what is playing, and whether the
-camera and microphone are in use, only to show them on the pill. It doesn't send your data
-anywhere, and it has no analytics.
+Everything stays on your Mac. DynamicMenu doesn't send your data anywhere and has no analytics.
 
 ## Known limits
 
@@ -89,9 +77,7 @@ open DynamicMenu.xcodeproj
 Choose your own signing team in Signing & Capabilities, then run. The app lives in the menu
 bar and has no Dock icon.
 
-DynamicMenu asks for access when it first needs it. Calendars for events, folders for the shelf
-and downloads, and Automation for controlling Music. Settings lists them under Permissions.
-Camera and microphone status needs no permission, because it only reads whether they are on.
+DynamicMenu asks for access when it first needs it. Settings lists every permission.
 
 ### Now Playing helper
 
@@ -174,15 +160,10 @@ The full reference is in [Docs/ExternalActivities.md](Docs/ExternalActivities.md
 
 ## Website
 
-The site at **https://markolko-447.github.io/DynamicMenu/** is the `website` folder. A workflow in
-`.github/workflows/pages.yml` publishes it to GitHub Pages whenever it changes on `main`. It is
-plain HTML with no build step. Serve the folder with any static web server to preview it.
-
-The pill in its videos is the app itself, recorded with a fixed clock so a calendar event always
-reads the same.
-
-The code is MIT. The two wallpapers in `website/assets` are not part of that license. One is the
-author's own, and the other is a photo from [Pixabay](https://pixabay.com/) used under its license.
+The site at **https://markolko-447.github.io/DynamicMenu/** is the `website` folder, published
+with GitHub Pages. It is plain HTML. The pill in its videos is the app itself. The two
+wallpapers in `website/assets` are not under the MIT license. One is the author's own and the
+other is a photo from [Pixabay](https://pixabay.com/), used under its license.
 
 ## Project layout
 
@@ -192,7 +173,7 @@ author's own, and the other is a photo from [Pixabay](https://pixabay.com/) used
 | `DynamicMenu/Activities` | One module for each kind of activity |
 | `DynamicMenu/Screens` | Finding displays, the notch, and menu bar space |
 | `DynamicMenu/Settings` | Settings and permissions |
-| `Docs` | The activity API for other apps |
+| `Docs` | The activity API for other apps, and the README preview |
 | `website` | The website, published with GitHub Pages |
 
 ## Contributing

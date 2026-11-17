@@ -521,6 +521,12 @@ footer p { margin: 0 0 6px; }
     desired = i;
     syncCaption();
   }
+  // iPhone shows a paused video's frames only after it has been played once.
+  function wake() {
+    const go = () => storyVideo.play().then(() => storyVideo.pause()).catch(() => {});
+    go();
+    addEventListener('touchstart', go, { once: true, passive: true });
+  }
   async function loadStory(next, keepPlace = false) {
     const place = keepPlace ? progress() : null;
     device = next;
@@ -532,21 +538,6 @@ footer p { margin: 0 0 6px; }
     bezel.src = frames[next][0];
     bezel.setAttribute('height', frames[next][1]);
     const name = runs[next];
-    // A phone gets a light copy with a full picture every few frames, which it can
-    // jump around in at once, and holds the whole file before the scroll begins.
-    const light = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
-    const file = `${MEDIA}/clips/${name}/sequence${light ? '-m' : ''}.mp4${REV}`;
-    if (light) {
-      try {
-        const blob = await fetch(file).then(r => r.blob());
-        if (device !== next) return;
-        if (storyVideo.dataset.blob) URL.revokeObjectURL(storyVideo.dataset.blob);
-        storyVideo.dataset.blob = URL.createObjectURL(blob);
-        storyVideo.src = storyVideo.dataset.blob;
-      } catch { storyVideo.src = file; }
-    } else {
-      storyVideo.src = file;
-    }
     const { duration, marks } = await fetch(`${MEDIA}/clips/${name}/sequence.json${REV}`).then(r => r.json());
     if (device !== next) return;   // switched again while this was loading
     // Each captioned state gets a scroll step the first time it appears; the
@@ -557,6 +548,24 @@ footer p { margin: 0 0 6px; }
     caption.innerHTML = unique.map(m => `<span>${verb(captions[m.state][0])}<small>${captions[m.state][1]}</small></span>`).join('');
     run = { unique, duration };
     shown = -1; desired = 0;
+    // The captions and the scroll are ready now; the video follows. A phone gets a
+    // light copy and holds the whole file, so scrubbing never waits on the network.
+    const light = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+    const file = `${MEDIA}/clips/${name}/sequence${light ? '-m' : ''}.mp4${REV}`;
+    (async () => {
+      let src = file;
+      if (light) {
+        try {
+          const blob = await fetch(file).then(r => r.blob());
+          if (device !== next) return;
+          if (storyVideo.dataset.blob) URL.revokeObjectURL(storyVideo.dataset.blob);
+          src = storyVideo.dataset.blob = URL.createObjectURL(blob);
+        } catch {}
+      }
+      storyVideo.src = src;
+      storyVideo.load();
+      wake();
+    })();
     if (place !== null) scrollTo(0, story.offsetTop + place * (story.offsetHeight - innerHeight));
     update();
   }

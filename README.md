@@ -64,6 +64,12 @@ Everything stays on your Mac. DynamicMenu doesn't send your data anywhere and ha
   on the Mac App Store, and a macOS update can break it.
 - The notch version shows one activity at a time, by design.
 
+## Install
+
+Download the latest version from [Releases](https://github.com/markolko-447/DynamicMenu/releases/latest),
+unzip it and move DynamicMenu to Applications. The first time you open it, macOS may say it
+can't verify the app. Open System Settings, go to Privacy & Security, and click Open Anyway.
+
 ## Build
 
 You need Xcode with the macOS 26 SDK.

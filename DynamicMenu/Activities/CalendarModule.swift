@@ -159,6 +159,14 @@ private struct EventCountdown: View {
 private struct CalendarExpandedView: View {
     let module: CalendarModule
 
+    /// "9:48–10:18" for a recording, which shows its own clock in a fixed style.
+    private var recordedRange: String {
+        let format = DateFormatter()
+        format.dateFormat = "H:mm"
+        let shift = DemoClock.wallOffset
+        return "\(format.string(from: module.startDate.addingTimeInterval(shift)))–\(format.string(from: module.endDate.addingTimeInterval(shift)))"
+    }
+
     var body: some View {
         HStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 3) {
@@ -166,9 +174,15 @@ private struct CalendarExpandedView: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(.white)
                     .lineLimit(1)
-                Text(module.startDate...module.endDate)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.secondary)
+                Group {
+                    if DemoClock.wallOffset == 0 {
+                        Text(module.startDate...module.endDate)
+                    } else {
+                        Text(recordedRange)
+                    }
+                }
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(.secondary)
                 if let location = module.location, module.joinURL == nil {
                     Text(location)
                         .font(.system(size: 12, weight: .medium))

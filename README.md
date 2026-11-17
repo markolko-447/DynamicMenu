@@ -1,28 +1,80 @@
 # DynamicMenu
 
-A pill in your Mac's menu bar for what is happening right now: the song that's playing, a
-timer, your next meeting, a download, the files on your shelf. On a MacBook with a notch it
-grows out of the notch; on any other display it floats at the top of the screen.
+### A Menu point of view.
 
-Free and open source, [MIT licensed](LICENSE). Requires macOS 26 or later.
+Music, timers, meetings and files right in your menu bar.
+
+On a Mac with a notch, it grows out of the notch. On any other display, it floats at the top of
+the screen as a small black pill. Free and open source under the [MIT license](LICENSE), for
+macOS 26 or later.
+
+**[See it in motion](https://markolko-447.github.io/DynamicMenu/)**
 
 > DynamicMenu is an independent project. It is not affiliated with or endorsed by Apple Inc.
 
-## What it shows
+## What it does
 
-- **Now Playing** from any app, including video in a browser tab, with play, skip and scrub.
-- **Timers** from the Clock app, and a finished timer that rings.
-- **Calendar** events a few minutes before they start, with a button to join the call.
-- **Downloads and AirDrop**, with progress.
-- **A file shelf**: drop files on the pill to keep them close, drag them out when you need them.
-- **Short alerts**: volume and brightness, Wi-Fi, VPN and Hotspot, AirPods and their battery,
-  unlock, Caps Lock, Low Power Mode, charging.
-- **Camera and microphone in use**, with the app using the microphone.
-- **Activities from other apps**, with buttons of their own (see below).
+**Whatever is playing.** Control music, podcasts or a video in any browser tab. Skip, scrub and
+save a track without leaving what you're doing.
 
-Several activities at once: the most important takes the pill, the next two sit beside it as
-bubbles. (A notch shows one at a time.) Settings let you switch each kind off, choose Solid,
-Gradient or Glass for each display, and mark which of your apps count as important.
+**Multiple Activities.** Control your music, watch a timer and stay ahead of your next meeting,
+all at the same time.
+
+**Never late again.** Get a heads-up before every appointment, and join the call straight from
+DynamicMenu.
+
+**Files on their way.** Follow every download and AirDrop transfer as it happens, without
+opening a window.
+
+**A Shelf.** Drag a file toward the top of your screen, drop it in, and drag it out again
+whenever you need it.
+
+**Your AirPods.** Their battery level shows up as soon as they connect, and again when you
+unlock.
+
+**Camera and microphone.** The pill lights up whenever either one is in use.
+
+**And the little things.** Wi-Fi, VPN and Hotspot. Volume and brightness. Charging, low battery
+and Low Power Mode. Caps Lock and the other small moments you would otherwise miss.
+
+**Third party apps, too.** Give your app its own place on the pill, with buttons of its own.
+It takes a few lines of code (see below).
+
+**Then it steps aside.** Nothing going on? It leaves your menu bar alone.
+
+## Pill or notch
+
+DynamicMenu chooses for you. A Mac with a notch gets the notch version, which shows one
+activity at a time. Every other display, including external monitors and Macs without a notch,
+gets a floating pill, and the second and third activities sit beside it as bubbles.
+
+## What comes first
+
+When several things are going on, the most important one takes the pill. The order is a
+finished timer, battery, small alerts, third party apps you marked as important, Now Playing,
+downloads, a running timer, the calendar, other third party apps, the shelf, and last the
+camera and microphone.
+
+## Make it yours
+
+In Settings you can switch each kind of activity on or off, choose Solid, Gradient or Glass for
+each display (Glass is for displays without a notch), and mark which third party apps are
+important. Apps appear in that list the first time they send an activity.
+
+## Privacy
+
+Everything stays on your Mac. DynamicMenu reads your calendar, what is playing, and whether the
+camera and microphone are in use, only to show them on the pill. It doesn't send your data
+anywhere, and it has no analytics.
+
+## Known limits
+
+- macOS still shows its own volume and brightness overlay. The pill shows the level as well, but
+  there is no safe, supported way to hide the system's.
+- macOS doesn't say which app is using the camera, so only the microphone names an app.
+- Reading what is playing uses a private system framework (see below), so DynamicMenu can't go
+  on the Mac App Store, and a macOS update can break it.
+- The notch version shows one activity at a time, by design.
 
 ## Build
 
@@ -34,19 +86,20 @@ cd DynamicMenu
 open DynamicMenu.xcodeproj
 ```
 
-Choose your own signing team in the project's Signing & Capabilities, then run. The app
-lives in the menu bar and has no Dock icon.
+Choose your own signing team in Signing & Capabilities, then run. The app lives in the menu
+bar and has no Dock icon.
 
-DynamicMenu asks for access when it first needs it: Calendars for events, folders for the
-shelf and downloads, Automation for controlling Music. Settings → Permissions lists them.
+DynamicMenu asks for access when it first needs it. Calendars for events, folders for the shelf
+and downloads, and Automation for controlling Music. Settings lists them under Permissions.
+Camera and microphone status needs no permission, because it only reads whether they are on.
 
 ### Now Playing helper
 
 Since macOS 15.4 the system's media information only answers Apple-signed processes, so the
-app reads it through a tiny library loaded into `/usr/bin/perl`
-(`Helper/NowPlayingBridge.m`, built into `DynamicMenu/Resources/NowPlayingBridge.bin` by
-`Helper/build.sh`). It uses a private system framework, so a build of DynamicMenu can't be
-distributed through the Mac App Store, and Apple can change it at any time.
+app reads it through a tiny library loaded into `/usr/bin/perl` (`Helper/NowPlayingBridge.m`,
+built into `DynamicMenu/Resources/NowPlayingBridge.bin` by `Helper/build.sh`). Rebuild it with
+`sh Helper/build.sh` after you change the source. It uses a private system framework, which is
+why the limits above apply.
 
 ## Show your own app's activity
 
@@ -122,15 +175,25 @@ The full reference is in [Docs/ExternalActivities.md](Docs/ExternalActivities.md
 
 ## Website
 
-The site at **https://markolko-447.github.io/DynamicMenu/** is the `website` folder, published to GitHub
-Pages by `.github/workflows/pages.yml` whenever it changes on `main`. It is plain HTML with no build
-step, so you can open `website/index.html` directly, or run `python3 Tools/serve_website.py` to
-preview it with video seeking.
+The site at **https://markolko-447.github.io/DynamicMenu/** is the `website` folder. A workflow in
+`.github/workflows/pages.yml` publishes it to GitHub Pages whenever it changes on `main`. It is
+plain HTML with no build step. Open `website/index.html`, or run `python3 Tools/serve_website.py`
+to preview it with video seeking.
 
-The pill in its videos is the app itself. `DynamicMenu/Demo` renders them (run the app with
-`--render-clips <folder> --wallpaper <image>`). The code is MIT. The two wallpapers in
-`website/assets` are not part of the MIT license: one is the author's own, the other is a
-photo from [Pixabay](https://pixabay.com/) used under its license.
+The pill in its videos is the app itself. To re-record them, give DynamicMenu Screen Recording
+access and run it with
+
+```sh
+DynamicMenu.app/Contents/MacOS/DynamicMenu --render-clips ./out --wallpaper hero.webp \
+    --story-wallpaper story.webp --stages hero,story,story-notch
+```
+
+then copy the clips into `website/media` and bump the version number in `website/index.html`.
+The recordings show a fixed clock, Tuesday 17 November at 9:40, so a calendar event always reads
+the same. See `DynamicMenu/Demo/ClipRenderer.swift` for the other options.
+
+The code is MIT. The two wallpapers in `website/assets` are not part of that license. One is the
+author's own, and the other is a photo from [Pixabay](https://pixabay.com/) used under its license.
 
 ## Project layout
 

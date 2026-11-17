@@ -95,11 +95,10 @@ Camera and microphone status needs no permission, because it only reads whether 
 
 ### Now Playing helper
 
-Since macOS 15.4 the system's media information only answers Apple-signed processes, so the
-app reads it through a tiny library loaded into `/usr/bin/perl` (`Helper/NowPlayingBridge.m`,
-built into `DynamicMenu/Resources/NowPlayingBridge.bin` by `Helper/build.sh`). Rebuild it with
-`sh Helper/build.sh` after you change the source. It uses a private system framework, which is
-why the limits above apply.
+Since macOS 15.4 the system's media information only answers Apple-signed processes, so the app
+reads it through a small helper library (`DynamicMenu/Resources/NowPlayingBridge.bin`) that it
+loads into `/usr/bin/perl`. It uses a private system framework, which is why the limits above
+apply.
 
 ## Show your own app's activity
 
@@ -177,8 +176,7 @@ The full reference is in [Docs/ExternalActivities.md](Docs/ExternalActivities.md
 
 The site at **https://markolko-447.github.io/DynamicMenu/** is the `website` folder. A workflow in
 `.github/workflows/pages.yml` publishes it to GitHub Pages whenever it changes on `main`. It is
-plain HTML with no build step. Open `website/index.html`, or run `python3 Tools/serve_website.py`
-to preview it with video seeking.
+plain HTML with no build step. Serve the folder with any static web server to preview it.
 
 The pill in its videos is the app itself. To re-record them, give DynamicMenu Screen Recording
 access and run it with
@@ -199,13 +197,13 @@ author's own, and the other is a photo from [Pixabay](https://pixabay.com/) used
 
 | Folder | What's in it |
 |---|---|
-| `DynamicMenu/Pill` | The pill itself: shape, motion, the fluid bubble effect |
-| `DynamicMenu/Activities` | One module per kind of activity |
+| `DynamicMenu/Pill` | The pill itself, with its shape, its motion and the fluid bubble effect |
+| `DynamicMenu/Activities` | One module for each kind of activity |
 | `DynamicMenu/Screens` | Finding displays, the notch, and menu bar space |
 | `DynamicMenu/Settings` | Settings and permissions |
 | `DynamicMenu/Demo` | The recorder that renders the pill's real animations to video |
-| `Helper` | The Now Playing helper |
 | `Docs` | The activity API for other apps |
+| `website` | The website, published with GitHub Pages |
 
 ## Contributing
 

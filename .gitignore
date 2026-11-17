@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+._*
+
+# Xcode: per-user state and build output
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+DerivedData/
+build/
+*.xcarchive
+*.dSYM
+*.dSYM.zip
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Local signing overrides (each contributor sets their own team)
+*.local.xcconfig
+
+# Editor and assistant settings
+.claude/
+.vscode/
+.idea/
+
+# Not part of the source release
+website/
+Tools/serve_website.py
+*.profraw
+default.profraw
+Docs/WebsiteCopy.md

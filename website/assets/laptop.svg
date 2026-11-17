@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1316" viewBox="0 0 2000 1316">
+  <defs>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#050505"/><stop offset="1" stop-color="#000"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2c2c2f"/><stop offset=".25" stop-color="#101011"/><stop offset="1" stop-color="#070707"/>
+    </linearGradient>
+  </defs>
+  <!-- Just the screen: black glass with the display cut out and the notch left in. -->
+  <path fill="url(#glass)" fill-rule="evenodd"
+    d="M233 137H1766A27 27 0 0 1 1793 164V1229H206V164A27 27 0 0 1 233 137Z
+       M237 149H907V167Q907 180 919 180H1081Q1093 180 1093 167V149H1762Q1782 149 1782 169V1159Q1782 1165 1776 1165H223Q217 1165 217 1159V169Q217 149 237 149Z"/>
+  <path d="M233 137.5H1766A26.5 26.5 0 0 1 1792.5 164V1229H206.5V164A26.5 26.5 0 0 1 233 137.5Z" fill="none" stroke="url(#rim)" stroke-width="1.5"/>
+</svg>

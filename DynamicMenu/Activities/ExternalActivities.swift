@@ -205,7 +205,7 @@ private struct ExternalValue: View {
                 Text(timerInterval: Date.now...end, countsDown: true)
                     .monospacedDigit()
             } else if let start = activity.payload.startDate.map(Date.init(timeIntervalSince1970:)), start < .now {
-                if let frozen = DemoClock.frozen {
+                if let frozen = DemoClock.now {
                     // Stopped time, for recordings.
                     let elapsed = max(0, frozen.timeIntervalSince(start).rounded())
                     Text(Duration.seconds(elapsed),

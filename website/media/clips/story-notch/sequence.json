@@ -1,0 +1,121 @@
+{
+  "duration" : 42.92221825,
+  "marks" : [
+    {
+      "state" : "idle",
+      "time" : 0
+    },
+    {
+      "state" : "unlock",
+      "time" : 1.4239999999999999
+    },
+    {
+      "state" : "music",
+      "time" : 3.1059999999999999
+    },
+    {
+      "state" : "music-open",
+      "time" : 4.4619999999999997
+    },
+    {
+      "state" : "look-gradient",
+      "time" : 6.0410000000000004
+    },
+    {
+      "state" : "look-solid",
+      "time" : 7.6609999999999996
+    },
+    {
+      "state" : "music",
+      "time" : 8.6989999999999998
+    },
+    {
+      "state" : "video-open",
+      "time" : 9.6080000000000005
+    },
+    {
+      "state" : "calendar-open",
+      "time" : 11.317
+    },
+    {
+      "state" : "calendar",
+      "time" : 13.023
+    },
+    {
+      "state" : "task",
+      "time" : 13.859999999999999
+    },
+    {
+      "state" : "task-open",
+      "time" : 15.275
+    },
+    {
+      "state" : "task",
+      "time" : 17.352
+    },
+    {
+      "state" : "transfer",
+      "time" : 18.297999999999998
+    },
+    {
+      "state" : "transfer-open",
+      "time" : 20.504000000000001
+    },
+    {
+      "state" : "dz0",
+      "time" : 23.108000000000001
+    },
+    {
+      "state" : "shelf4",
+      "time" : 24.422999999999998
+    },
+    {
+      "state" : "shelf4c",
+      "time" : 26.030000000000001
+    },
+    {
+      "state" : "airpods",
+      "time" : 27.350999999999999
+    },
+    {
+      "state" : "volume",
+      "time" : 29.047000000000001
+    },
+    {
+      "state" : "brightness",
+      "time" : 30.353999999999999
+    },
+    {
+      "state" : "wifi",
+      "time" : 31.565000000000001
+    },
+    {
+      "state" : "vpn",
+      "time" : 32.874000000000002
+    },
+    {
+      "state" : "hotspot",
+      "time" : 34.079999999999998
+    },
+    {
+      "state" : "privacy",
+      "time" : 35.298999999999999
+    },
+    {
+      "state" : "battery",
+      "time" : 36.725999999999999
+    },
+    {
+      "state" : "lowpower",
+      "time" : 38.073
+    },
+    {
+      "state" : "caps",
+      "time" : 39.311
+    },
+    {
+      "state" : "idle-away",
+      "time" : 40.524000000000001
+    }
+  ]
+}

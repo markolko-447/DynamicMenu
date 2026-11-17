@@ -148,7 +148,7 @@ private struct TimerReadout: View {
     let module: TimerModule
 
     var body: some View {
-        if let end = module.end, let frozen = DemoClock.frozen {
+        if let end = module.end, let frozen = DemoClock.now {
             // Stopped time, for recordings: the same digits in every frame.
             let left = max(0, end.timeIntervalSince(frozen).rounded())
             Text(Duration.seconds(left), format: .time(pattern: left >= 3600 ? .hourMinuteSecond : .minuteSecond))

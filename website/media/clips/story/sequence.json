@@ -1,0 +1,137 @@
+{
+  "duration" : 49.216771250999997,
+  "marks" : [
+    {
+      "state" : "idle",
+      "time" : 0
+    },
+    {
+      "state" : "phase-dot",
+      "time" : 1.2110000000000001
+    },
+    {
+      "state" : "unlock",
+      "time" : 2.698
+    },
+    {
+      "state" : "music",
+      "time" : 4.3230000000000004
+    },
+    {
+      "state" : "music-open",
+      "time" : 5.6710000000000003
+    },
+    {
+      "state" : "look-gradient",
+      "time" : 7.1799999999999997
+    },
+    {
+      "state" : "look-glass",
+      "time" : 8.7710000000000008
+    },
+    {
+      "state" : "look-solid",
+      "time" : 10.571999999999999
+    },
+    {
+      "state" : "music",
+      "time" : 11.619
+    },
+    {
+      "state" : "video-open",
+      "time" : 12.566000000000001
+    },
+    {
+      "state" : "music-timer",
+      "time" : 14.204000000000001
+    },
+    {
+      "state" : "three",
+      "time" : 15.532
+    },
+    {
+      "state" : "three-calendar-open",
+      "time" : 16.847999999999999
+    },
+    {
+      "state" : "three",
+      "time" : 18.395
+    },
+    {
+      "state" : "task",
+      "time" : 19.327999999999999
+    },
+    {
+      "state" : "task-open",
+      "time" : 20.748000000000001
+    },
+    {
+      "state" : "task",
+      "time" : 22.831
+    },
+    {
+      "state" : "transfer",
+      "time" : 23.777999999999999
+    },
+    {
+      "state" : "transfer-open",
+      "time" : 25.984000000000002
+    },
+    {
+      "state" : "dz0",
+      "time" : 28.651
+    },
+    {
+      "state" : "shelf4",
+      "time" : 30.029
+    },
+    {
+      "state" : "shelf4c",
+      "time" : 31.545999999999999
+    },
+    {
+      "state" : "airpods",
+      "time" : 32.890000000000001
+    },
+    {
+      "state" : "volume",
+      "time" : 34.515999999999998
+    },
+    {
+      "state" : "brightness",
+      "time" : 35.819000000000003
+    },
+    {
+      "state" : "wifi",
+      "time" : 37.033000000000001
+    },
+    {
+      "state" : "vpn",
+      "time" : 38.356000000000002
+    },
+    {
+      "state" : "hotspot",
+      "time" : 39.564999999999998
+    },
+    {
+      "state" : "privacy",
+      "time" : 40.779000000000003
+    },
+    {
+      "state" : "battery",
+      "time" : 42.180999999999997
+    },
+    {
+      "state" : "lowpower",
+      "time" : 43.509999999999998
+    },
+    {
+      "state" : "caps",
+      "time" : 44.780999999999999
+    },
+    {
+      "state" : "idle-away",
+      "time" : 45.991999999999997
+    }
+  ]
+}

@@ -27,6 +27,8 @@ final class TransfersModule: ActivityModule {
     @ObservationIgnored private var transfers: [Progress] = []
     @ObservationIgnored private var subscriber: Any?
     @ObservationIgnored private var sampleTask: Task<Void, Never>?
+    /// Moves the demo transfer along (see `startDemoProgress`).
+    @ObservationIgnored fileprivate var demoTask: Task<Void, Never>?
 
     func start() {
         guard subscriber == nil,
@@ -92,12 +94,13 @@ final class TransfersModule: ActivityModule {
             .symbolEffect(.pulse, options: .repeating, isActive: !isReceiving))
     }
 
+    // A ring that fills smoothly, as Apple's own AirDrop does: no digits to flicker.
     var compactTrailing: AnyView {
-        AnyView(TransferPercent(module: self))
+        AnyView(TransferRing(module: self))
     }
 
     var minimal: AnyView {
-        AnyView(TransferPercent(module: self))
+        AnyView(TransferRing(module: self))
     }
 
     var expanded: AnyView {
@@ -111,14 +114,23 @@ private nonisolated struct ProgressBox: @unchecked Sendable {
     init(_ progress: Progress) { self.progress = progress }
 }
 
-private struct TransferPercent: View {
+/// Progress as a ring that glides to each new value.
+private struct TransferRing: View {
     let module: TransfersModule
+    @Environment(\.pillContentHeight) private var contentHeight
 
     var body: some View {
-        Text(module.fraction, format: .percent.precision(.fractionLength(0)))
-            .monospacedDigit()
-            .foregroundStyle(.blue)
-            .contentTransition(.numericText())
+        let side = min(contentHeight * 0.66, 18)
+        ZStack {
+            Circle().stroke(.blue.opacity(0.28), lineWidth: 2.4)
+            Circle()
+                .trim(from: 0, to: min(max(module.fraction, 0.02), 1))
+                .stroke(.blue, style: StrokeStyle(lineWidth: 2.4, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+        }
+        .frame(width: side, height: side)
+        .animation(.smooth(duration: 0.9), value: module.fraction)
+        .accessibilityValue(Text(module.fraction, format: .percent.precision(.fractionLength(0))))
     }
 }
 
@@ -140,8 +152,6 @@ private struct TransferExpandedView: View {
                 LevelBar(level: module.fraction, tint: .blue)
                     .frame(height: 6)
             }
-            TransferPercent(module: module)
-                .font(.system(size: 13, weight: .semibold))
         }
     }
 }
@@ -149,6 +159,24 @@ private struct TransferExpandedView: View {
 // MARK: - Demo content (for the state renderer and --demo)
 
 extension TransfersModule {
+    /// Moves the demo transfer along, so a recording shows it arriving instead of
+    /// standing still at one number.
+    func startDemoProgress(from start: Double, to end: Double, over seconds: Double) {
+        demoTask?.cancel()
+        fraction = start
+        demoTask = Task { [weak self] in
+            let began = ContinuousClock.now
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(100))
+                let parts = began.duration(to: .now).components
+                let elapsed = Double(parts.seconds) + Double(parts.attoseconds) / 1e18
+                let t = min(1, elapsed / seconds)
+                self?.fraction = start + (end - start) * t
+                if t >= 1 { break }
+            }
+        }
+    }
+
     static func demo(fileName: String, fraction: Double, airDrop: Bool) -> TransfersModule {
         let module = TransfersModule()
         module.fileName = fileName

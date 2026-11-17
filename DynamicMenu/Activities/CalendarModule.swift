@@ -142,7 +142,7 @@ private struct EventCountdown: View {
     var body: some View {
         TimelineView(.periodic(from: .distantPast, by: 1)) { context in
             let now = DemoClock.date(context.date)
-            if let frozen = DemoClock.frozen, module.startDate > frozen {
+            if let frozen = DemoClock.now, module.startDate > frozen {
                 let left = module.startDate.timeIntervalSince(frozen).rounded()
                 Text(Duration.seconds(left), format: .time(pattern: .minuteSecond))
                     .monospacedDigit()

@@ -120,6 +120,18 @@ compact view), `progress` (0 to 1), `endDate` or `startDate` (seconds since 1970
 
 The full reference is in [Docs/ExternalActivities.md](Docs/ExternalActivities.md).
 
+## Website
+
+The site at **https://markolko-447.github.io/DynamicMenu/** is the `website` folder, published to GitHub
+Pages by `.github/workflows/pages.yml` whenever it changes on `main`. It is plain HTML with no build
+step, so you can open `website/index.html` directly, or run `python3 Tools/serve_website.py` to
+preview it with video seeking.
+
+The pill in its videos is the app itself. `DynamicMenu/Demo` renders them (run the app with
+`--render-clips <folder> --wallpaper <image>`). The code is MIT. The two wallpapers in
+`website/assets` are not part of the MIT license: one is the author's own, the other is a
+photo from [Pixabay](https://pixabay.com/) used under its license.
+
 ## Project layout
 
 | Folder | What's in it |

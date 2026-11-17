@@ -40,6 +40,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 let path = (arguments[wallpaper + 1] as NSString).expandingTildeInPath
                 ClipBackdrop.wallpaper = NSImage(contentsOfFile: path)
             }
+            // --story-wallpaper: the scroll section's own wallpaper.
+            if let story = arguments.firstIndex(of: "--story-wallpaper"), story + 1 < arguments.count {
+                let path = (arguments[story + 1] as NSString).expandingTildeInPath
+                ClipBackdrop.storyWallpaper = NSImage(contentsOfFile: path)
+            }
             ClipRenderer.stillsOnly = arguments.contains("--stills-only")
             if let i = arguments.firstIndex(of: "--pair"), i + 1 < arguments.count {
                 let parts = arguments[i + 1].split(separator: ":").map(String.init)

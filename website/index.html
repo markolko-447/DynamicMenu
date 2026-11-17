@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DynamicMenu</title>
+<meta name="description" content="Live activities in the menu bar of every Mac display, and in the notch on your MacBook.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="assets/app-icon.png">
+<style>
+:root {
+  --bg: #000;
+  --card: #f5f5f7;
+  --pill: #f5f5f7;
+  --text: #1d1d1f;
+  --text-2: #6e6e73;
+  --hairline: rgba(0, 0, 0, 0.1);
+  --accent: #0066cc;
+  --button: #0071e3;
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --spring: cubic-bezier(.2, .9, .25, 1.06);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.47 -apple-system, BlinkMacSystemFont, system-ui, "Helvetica Neue", sans-serif;
+  letter-spacing: -0.022em;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+img, video { display: block; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { font: inherit; color: inherit; }
+
+.wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+
+/* Navigation: black pills with a grey outline, like the app's own pill and the bubbles
+   beside it. In the middle, the icon and name. On the right, a circle for the display /
+   notch menu. */
+.nav {
+  position: fixed; z-index: 50; top: 12px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px;
+}
+.nav .pill {
+  position: relative; display: flex; align-items: center; height: 44px; border-radius: 22px;
+  background: #000; color: #fff; border: 1px solid #3c3c40; box-shadow: 0 10px 30px rgba(0, 0, 0, .28);
+}
+.nav .main { gap: 9px; padding: 0 18px 0 8px; }
+.nav .main .icon { width: 28px; height: 28px; }
+.nav .main strong { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; }
+/* The menu: a circle with the current device, no label */
+.nav .menu { position: relative; }
+.nav .menu-button.pill {
+  width: 44px; padding: 0; justify-content: center; cursor: pointer; transition: background-color 160ms ease;
+}
+.nav .menu-button.pill:hover, .nav .menu-button.pill[aria-expanded="true"] { background: #151517; }
+.nav .menu-button:focus-visible, .nav .menu-list button:focus-visible { outline: 2px solid var(--button); outline-offset: 2px; }
+.nav .menu svg.device { width: 20px; height: 20px; flex: none; }
+.nav .menu[data-value="display"] .menu-button .i-macbook, .nav .menu[data-value="macbook"] .menu-button .i-display { display: none; }
+.nav .menu-list {
+  position: absolute; top: calc(100% + 12px); right: 0; min-width: 210px; margin: 0; padding: 6px; list-style: none;
+  background: #000; border: 1px solid #3c3c40; border-radius: 20px; box-shadow: 0 16px 40px rgba(0, 0, 0, .35);
+  opacity: 0; transform: translateY(-6px) scale(.98); transform-origin: top right; pointer-events: none;
+  transition: opacity 180ms ease, transform 260ms var(--spring);
+}
+.nav .menu-list.open { opacity: 1; transform: none; pointer-events: auto; }
+.nav .menu-list button {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: 0; border-radius: 14px;
+  background: transparent; color: rgba(255, 255, 255, .82); cursor: pointer; font-size: 14px; font-weight: 500; text-align: left;
+}
+.nav .menu-list button:hover { background: #1c1c1e; color: #fff; }
+.nav .menu-list button[aria-selected="true"] { color: #fff; }
+.nav .menu-list .tick { margin-left: auto; width: 14px; height: 14px; opacity: 0; color: var(--button); }
+.nav .menu-list button[aria-selected="true"] .tick { opacity: 1; }
+@media (max-width: 440px) { .nav .main strong { display: none; } .nav .main { padding: 0 8px; } }
+
+.button {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 32px; padding: 0 16px; border-radius: 980px; border: 0; cursor: pointer;
+  background: var(--button); color: #fff;
+  font-size: 14px; font-weight: 500; letter-spacing: -0.01em;
+  transition: transform 120ms ease-out, filter 120ms ease-out;
+}
+.button:hover { text-decoration: none; filter: brightness(1.12); }
+.button:active { transform: scale(0.97); }
+.button.large { height: 48px; padding: 0 28px; font-size: 17px; }
+.buttons { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+/* The second button: an outline, so Download stays the one to press */
+.button.secondary { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1.5px rgba(0, 0, 0, .22); gap: 9px; }
+.button.secondary:hover { background: rgba(0, 0, 0, .05); filter: none; }
+.button.secondary svg { width: 20px; height: 20px; flex: none; }
+.hero .button.secondary { color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .4); }
+.hero .button.secondary:hover { background: rgba(255, 255, 255, .12); }
+
+/* Type */
+.eyebrow { font-size: 21px; font-weight: 600; color: var(--text-2); margin: 0 0 8px; letter-spacing: -0.01em; }
+h1, h2 { margin: 0; font-weight: 700; }
+h1 { font-size: clamp(34px, 5.2vw, 62px); line-height: 1.04; letter-spacing: -0.035em; text-wrap: balance; }
+h2 { font-size: clamp(34px, 5.5vw, 64px); line-height: 1.05; letter-spacing: -0.035em; }
+.lede { font-size: clamp(15px, 1.5vw, 18px); line-height: 1.4; color: var(--text-2); margin: 18px 0 0; letter-spacing: -0.015em; max-width: 32em; }
+.lede b { color: var(--text); font-weight: 600; }
+.center { text-align: center; }
+.center .lede { margin-inline: auto; }
+section { padding: clamp(80px, 12vw, 150px) 0; }
+
+/* Point scale ---------------------------------------------------------------
+   Screens and stages are size containers. Inside, one point of the Mac's
+   screen is var(--pt), so the recorded frames land at their true size. */
+.screen { container-type: inline-size; }
+.screen > * { --pt: calc(100cqw / var(--points)); }
+
+/* Hero: in the manner of Apple's pill launch film. A black stage, a rim of
+   light finds the display, then the camera cuts and moves with every change on
+   the pill (timed to the recording itself), pulls back and fades to black.
+   The script sets --rx --ry --s --tx --ty (the camera) and --b --rim (light). */
+.hero { position: relative; padding: 0; height: 100vh; height: 100svh; min-height: 620px; overflow: hidden; background: #000; }
+.hero .scene { perspective: 4200px; perspective-origin: 50% 30%; filter: brightness(var(--b, 1)); }
+.hero .monitor {
+  --s: 3.6;
+  position: absolute; left: 50%; top: 27vh; width: min(52vw, 92vh);
+  transform-origin: 50% 8%;
+  transform:
+    translate(calc(-50% + var(--tx, 0) * 1vw), calc(var(--ty, 0) * 1vh))
+    rotateX(calc(var(--rx, 0) * 1deg)) rotateY(calc(var(--ry, 0) * 1deg))
+    scale(var(--s, 4));
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+/* the recording is the screen's top-middle: 960 × 440 of 2560 × 1440 points */
+.hero .monitor .clip { height: 30.56%; }
+/* A soft purple rim light that sweeps along the top edge */
+.hero .rim {
+  position: absolute; z-index: 4; left: 0; right: 0; top: -0.2%; height: 1.4%;
+  border-radius: 999px; pointer-events: none; opacity: var(--rim, 0);
+  background: linear-gradient(90deg, transparent, rgba(190, 140, 255, .0) 30%, rgba(210, 170, 255, .95) 50%, rgba(190, 140, 255, .0) 70%, transparent)
+              calc(var(--sweep, 0) * 100%) 0 / 60% 100% no-repeat;
+  filter: blur(2px); mix-blend-mode: screen;
+  box-shadow: 0 0 40px rgba(160, 110, 255, calc(var(--rim, 0) * .35));
+}
+.intro-dot-unused {
+  position: absolute; z-index: 3; border-radius: 50%; background: #000;
+  transform: translate(-50%, -50%); pointer-events: none; will-change: transform;
+}
+.hero .hero-copy { opacity: 0; transform: translateY(16px); transition: opacity .9s var(--ease-out) .3s, transform 1.1s var(--ease-out) .3s; }
+.hero.ready .hero-copy { opacity: 1; transform: none; }
+.hero-fade {
+  /* black at the bottom, so the copy reads over the display */
+  position: absolute; inset: 45% 0 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, .7) 55%, #000);
+}
+.hero-copy {
+  position: absolute; z-index: 2; left: 0; right: 0; bottom: clamp(40px, 9vh, 96px);
+  text-align: center; color: #fff;
+}
+.hero-copy .lede { color: rgba(255,255,255,.78); margin-inline: auto; }
+.hero .cta { margin-top: 28px; display: flex; flex-direction: column; justify-content: center; gap: 14px; align-items: center; }
+.hero .cta span { color: rgba(255,255,255,.7); font-size: 14px; }
+@media (max-width: 700px) { .hero .monitor { width: 92vw; top: 20vh; } }
+.screen .menubar {
+  position: absolute; left: 0; right: 0; top: 0; height: calc(30 * var(--pt));
+  display: flex; align-items: center; justify-content: flex-end; gap: calc(14 * var(--pt)); padding: 0 calc(16 * var(--pt));
+  color: rgba(0, 0, 0, .85); font-size: calc(13 * var(--pt)); font-weight: 500; letter-spacing: 0; white-space: nowrap;
+}
+.screen .menubar .icon {
+  width: calc(28 * var(--pt)); height: calc(9 * var(--pt)); background: currentColor;
+  -webkit-mask: url(assets/menubar-icon.svg) center / contain no-repeat; mask: url(assets/menubar-icon.svg) center / contain no-repeat;
+}
+
+
+/* Story: scrolling scrubs through one recorded run, shown on the top of a display
+   or a MacBook (our own drawings), seen at an angle while the Mac powers on; as it
+   unlocks it turns to face you. --t: 1 turned, 0 facing you. */
+.story { position: relative; height: calc(var(--frames, 12) * 70vh + 100vh); padding: 0; }
+.story .pin {
+  position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
+  background: #000;
+}
+.scene { position: absolute; inset: 0; perspective: 4200px; perspective-origin: 50% 0%; }
+.story .scene { perspective-origin: 50% 0%; }
+.story .monitor {
+  --t: 0;
+  /* How much larger it is built than a normal fit: it is made at its largest and
+     scaled down, never up. A layer scaled up after it is drawn is stretched, and
+     goes soft; one scaled down stays sharp. */
+  --k: 4;
+  /* --t 0: centred and close on the top of the display. --t 1: turned, the
+     near left corner and its side edge in view. */
+  --w: min(52vw, 92vh);
+  --top: 22vh;
+  --ratio: .7705;   /* the frame image's height over its width */
+  --oy: .08;        /* where the lid's top edge sits, as a share of its height */
+  position: absolute; left: 50%;
+  /* Placed so its top edge lands where the small version's did. */
+  top: calc(var(--top) - (var(--k) - 1) * var(--oy) * var(--w) * var(--ratio));
+  width: calc(var(--w) * var(--k));
+  transform-origin: 50% calc(var(--oy) * 100%);
+  transform:
+    translate(-50%, calc(var(--t) * 10vh))
+    rotateX(calc(var(--t) * 62deg))
+    scale(calc(1 - var(--t) * 0.4));
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+/* The display's top, folded back 90° along the top edge, seen from above: matt,
+   bead-blasted aluminium. Not brushed lines: a fine even grain (generated noise,
+   light and dark speckle) over a soft fall from light to dark, as in a photo of
+   the metal. Our own drawing. */
+.monitor::after {
+  content: ""; position: absolute; z-index: 3; left: 0.4%; right: 0.4%; top: 0.35%;
+  height: 0; padding-bottom: 2.6%;
+  transform-origin: 50% 0; transform: rotateX(90deg);
+  border-radius: calc(3px * var(--k)) calc(3px * var(--k)) 0 0;
+  background:
+    linear-gradient(to right, rgba(0,0,0,.28), rgba(0,0,0,0) 5%, rgba(0,0,0,0) 95%, rgba(0,0,0,.28)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='300'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1.5 0 0 0 -.25  1.5 0 0 0 -.25  1.5 0 0 0 -.25  0 0 0 0 .22'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 600px 300px,
+    linear-gradient(to bottom, #bdbebf 0%, #a2a3a5 40%, #7e7f82 78%, #67686b 100%);
+}
+/* On a MacBook: its lid, its screen and the notch. The recording is the screen's
+   top-middle, 960 × 540 of 1512 × 982 points. */
+.story[data-device="macbook"] .monitor { --ratio: .658; --oy: .10; }
+/* It moves like the display does: it starts high above, looking down, and swings to face you. */
+.story[data-device="macbook"] .monitor .screen { left: 10.85%; top: 11.32%; width: 78.3%; height: 77.2%; --points: 1512; }
+.story[data-device="macbook"] .monitor .clip { left: 18.25%; width: 63.5%; height: 55%; }
+.story[data-device="macbook"] .monitor::before { display: none; }
+/* A MacBook's lid is a thin, rounded edge, which the drawing already has; the flat
+   top face used for the display would be a straight band across the corners. */
+.story[data-device="macbook"] .monitor::after { display: none; }
+/* The left side, for the slight turn */
+.monitor::before {
+  content: ""; position: absolute; z-index: 3; left: 0; top: 0.5%; height: 73.9%;
+  width: 1.6%; transform-origin: 0 50%; transform: rotateY(90deg);
+  background: linear-gradient(to right, #1a1a1c, #0a0a0b 40%, #000);
+  border-radius: calc(2px * var(--k));
+}
+.monitor .bezel { position: relative; z-index: 2; width: 100%; height: auto; display: block; pointer-events: none; }
+.monitor .screen {
+  position: absolute; z-index: 1; left: 1.55%; top: 2.08%; width: 96.85%; height: 70.7%; overflow: hidden;
+  container-type: inline-size; --points: 2560;
+  background: #000 url(assets/wallpaper.webp?r=10) center / cover;
+}
+/* The scroll section's display has its own wallpaper */
+.story .monitor .screen { background-image: url(assets/wallpaper-story.webp?r=1); }
+.monitor .screen > * { --pt: calc(100cqw / var(--points)); }
+/* The recording is the screen's top-middle: 960 × 540 of 2560 × 1440 points */
+.monitor .clip {
+  position: absolute; left: 31.25%; top: 0; width: 37.5%; height: 37.5%; z-index: 1;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent),
+                      linear-gradient(to bottom, #000 70%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent),
+              linear-gradient(to bottom, #000 70%, transparent);
+  mask-composite: intersect;
+}
+.story .caption {
+  position: absolute; z-index: 2; margin: 0; width: min(720px, 70vw);
+  left: clamp(24px, 5vw, 80px); bottom: clamp(36px, 7vh, 72px); height: 6.4em;
+  color: #fff; font-size: clamp(30px, 3.4vw, 46px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, .55), 0 1px 3px rgba(0, 0, 0, .35);
+}
+/* A soft shade along the bottom keeps the words readable over the picture: no card. */
+.story .pin::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(0deg, rgba(0, 0, 0, .7), rgba(0, 0, 0, .36) 28%, rgba(0, 0, 0, 0) 52%);
+}
+.story .caption span {
+  position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start;
+  opacity: 0; transform: translateY(14px);
+  transition: opacity 400ms var(--ease-out), transform 600ms var(--ease-out);
+}
+.story .caption span { pointer-events: none; }
+.story .caption span.on { opacity: 1; transform: none; pointer-events: auto; }
+.story .caption small a { color: #fff; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,.55); }
+.story .caption small { display: block; font-size: 0.42em; font-weight: 500; color: rgba(255, 255, 255, .82); letter-spacing: -0.01em; line-height: 1.4; margin-top: 12px; }
+@media (max-width: 700px) {
+  .story .monitor { --k: 9; --w: 92vw; --top: 34vh; transform:
+    translate(-50%, calc(var(--t) * 3vh))
+    rotateX(calc(var(--t) * 58deg)) scale(calc(1 - var(--t) * 0.4)); }
+  .story .caption { width: auto; right: 16px; left: 16px; bottom: 56px; height: 5.6em; font-size: 26px; }
+}
+@media (prefers-reduced-motion: reduce) { .story .monitor { --t: 0 !important; } }
+
+/* Download */
+.download { text-align: center; background: #000; color: #f5f5f7; }
+.download h2 { color: #f5f5f7; }
+.download .lede { color: rgba(255, 255, 255, .7); }
+.download .lede { margin-inline: auto; }
+.download img.appicon { width: 144px; height: 144px; margin: 0 auto 28px; filter: drop-shadow(0 20px 50px rgba(255, 255, 255, .08)); }
+.download .button.secondary { color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .4); }
+.download .button.secondary:hover { background: rgba(255, 255, 255, .12); }
+.download .buttons { margin-top: 36px; }
+.download .req { color: rgba(255, 255, 255, .55); font-size: 14px; margin-top: 14px; }
+.download .req a { color: rgba(255, 255, 255, .75); text-decoration: underline; text-underline-offset: 3px; }
+
+footer { background: #000; border-top: 1px solid rgba(255, 255, 255, .12); padding: 28px 0 44px; color: rgba(255, 255, 255, .5); font-size: 12px; line-height: 1.5; }
+footer a { color: rgba(255, 255, 255, .72); }
+footer p { margin: 0 0 6px; }
+
+/* Reveal on scroll: a short rise */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 800ms var(--ease-out), transform 1000ms var(--ease-out); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .story .caption span { transform: none !important; transition: opacity 200ms; }
+  .reveal { opacity: 1; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .hint { background: rgba(0,0,0,.75); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="pill main">
+    <img class="icon" src="assets/app-icon.png" alt="">
+    <strong>DynamicMenu</strong>
+  </div>
+  <div class="menu" id="device" data-value="display">
+    <button class="pill menu-button" id="device-button" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Showing a standard display. Change.">
+      <svg class="device i-display" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 20h7M12 16.2V20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><svg class="device i-macbook" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7.2A2.7 2.7 0 0 1 7.7 4.5h8.6A2.7 2.7 0 0 1 19 7.2V15.5H5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 4.5h4v.7a1.3 1.3 0 0 1-1.3 1.3h-1.4A1.3 1.3 0 0 1 10 5.2Z" fill="currentColor"/><path d="M2.8 19h18.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+    <ul class="menu-list" id="device-list" role="listbox" aria-label="Show the scroll on">
+      <li><button type="button" role="option" data-device="display" aria-selected="true"><svg class="device i-display" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 20h7M12 16.2V20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Standard display<svg class="tick" viewBox="0 0 14 14" aria-hidden="true"><path d="m2.5 7.5 3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></li>
+      <li><button type="button" role="option" data-device="macbook" aria-selected="false"><svg class="device i-macbook" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7.2A2.7 2.7 0 0 1 7.7 4.5h8.6A2.7 2.7 0 0 1 19 7.2V15.5H5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 4.5h4v.7a1.3 1.3 0 0 1-1.3 1.3h-1.4A1.3 1.3 0 0 1 10 5.2Z" fill="currentColor"/><path d="M2.8 19h18.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Mac with a notch<svg class="tick" viewBox="0 0 14 14" aria-hidden="true"><path d="m2.5 7.5 3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></li>
+    </ul>
+  </div>
+</header>
+
+<main>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="scene">
+      <div class="monitor">
+        <div class="screen">
+          <div class="menubar"><span class="icon"></span><span>Mon 16 Nov</span><span>9:41</span></div>
+          <video class="clip loop" src="media/clips/hero/sequence.mp4?r=18" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>
+        </div>
+        <img class="bezel" src="assets/display.svg?r=4" width="2000" height="1541" alt="A display with DynamicMenu's pill in the menu bar">
+        
+      </div>
+    </div>
+    <div class="hero-fade" aria-hidden="true"></div>
+    <div class="hero-copy wrap">
+      <h1>A Menu point of view.</h1>
+      <p class="lede">Music, timers, meetings and files right in your menu bar.</p>
+      <div class="cta">
+        <div class="buttons">
+          <a class="button large" href="https://github.com/markolko-447/DynamicMenu/releases/latest" target="_blank" rel="noopener">Download</a>
+          <a class="button large secondary" href="https://github.com/markolko-447/DynamicMenu" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>GitHub</a>
+        </div>
+        <span>Free · macOS 26 or later</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Story: scrolling scrubs through a recorded run -->
+  <section class="story" id="story" data-device="display">
+    <div class="pin">
+      <div class="scene">
+        <div class="monitor">
+          <div class="screen">
+            <div class="menubar"><span class="icon"></span><span>Mon 16 Nov</span><span>9:41</span></div>
+            <video class="clip" muted playsinline preload="auto" aria-hidden="true"></video>
+          </div>
+          <img class="bezel" src="assets/display.svg?r=4" width="2000" height="1541" alt="">
+        </div>
+      </div>
+      <div class="caption" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- Download -->
+  <section class="download" id="download">
+    <div class="wrap reveal">
+      <img class="appicon" src="assets/app-icon.png" alt="DynamicMenu app icon">
+      <h2>Get DynamicMenu.</h2>
+      <p class="lede">Free and open source, under the MIT license.</p>
+      <div class="buttons">
+        <a class="button large" href="https://github.com/markolko-447/DynamicMenu/releases/latest" target="_blank" rel="noopener">Download for Mac</a>
+        <a class="button large secondary" href="https://github.com/markolko-447/DynamicMenu" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg>GitHub</a>
+      </div>
+      <p class="req">Requires macOS 26 or later. Read the <a href="https://github.com/markolko-447/DynamicMenu/blob/main/LICENSE" target="_blank" rel="noopener">MIT license</a>.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Apple, Mac, MacBook and macOS are trademarks of Apple Inc., registered in the U.S. and other countries. DynamicMenu is an independent app and is not affiliated with or endorsed by Apple Inc.</p>
+    <p>DynamicMenu is released under the <a href="https://github.com/markolko-447/DynamicMenu/blob/main/LICENSE" target="_blank" rel="noopener">MIT license</a>. <a href="https://github.com/markolko-447/DynamicMenu" target="_blank" rel="noopener">Source on GitHub</a>.</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const MEDIA = 'media';
+  const REV = '?r=18';   // bump after re-recording, so browsers fetch the new files
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const touch = matchMedia('(pointer: coarse)').matches;
+  const verb = text => touch ? text.replace(/\bClick\b/g, 'Tap') : text;
+  document.querySelectorAll('.verb').forEach(el => el.textContent = verb(el.textContent));
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  // ------------------------------------------------------------------ Hero
+  // The intro: the hero opens black, which is a huge circle over the display.
+  // It springs down to the pill's dot (same place, same size) just as the
+  // recording shows that dot, hands over, and the pill opens from it. The
+  // recording then loops back to the dot, not to black.
+  const loop = document.querySelector('.hero .loop');
+  const hero = document.querySelector('.hero');
+  loop.removeAttribute('loop');
+  let dotTime = 0.83;
+  fetch(`${MEDIA}/clips/hero/sequence.json${REV}`).then(r => r.json()).then(({ marks }) => {
+    dotTime = marks.find(m => m.state === 'phase-dot')?.time ?? dotTime;
+  });
+  // The recording plays through once, then comes back round to its dot, which is
+  // where the pill's step-aside at the end of the clip left it.
+  loop.addEventListener('ended', () => { loop.currentTime = dotTime; loop.play(); });
+  hero.classList.add('ready');
+  if (reduce) { loop.removeAttribute('autoplay'); loop.pause(); }
+
+  // ------------------------------------------------------------------ Navigation
+  // The display / notch menu: opens under its button, closes on a choice, a click
+  // elsewhere or Escape. The story below listens to the choice.
+  const deviceMenu = document.getElementById('device');
+  const deviceButton = document.getElementById('device-button');
+  const deviceList = document.getElementById('device-list');
+  function setMenu(open) {
+    deviceList.classList.toggle('open', open);
+    deviceButton.setAttribute('aria-expanded', String(open));
+  }
+  deviceButton.addEventListener('click', () => setMenu(!deviceList.classList.contains('open')));
+  document.addEventListener('click', e => { if (!deviceMenu.contains(e.target)) setMenu(false); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') { setMenu(false); deviceButton.focus(); } });
+
+  // ------------------------------------------------------------------ Story
+  const captions = {
+    'idle': ['', ''],
+    'phase-dot': ['', ''],
+    'unlock': ['Unlock.', 'It wakes with you.'],
+    'music': ['Press play.', 'What’s playing, wherever it plays.'],
+    'music-open': ['Control your songs.', 'Skip, scrub and save a track without leaving what you’re doing.'],
+    'look-gradient': ['Make it yours.', 'Solid or Gradient, display by display.'],
+    'look-glass': ['Or see right through it.', 'On any external display, or any Mac without a notch, the pill can be pure glass.'],
+    'video-open': ['Whatever is playing.', 'Control music, podcasts or a video in any browser tab.'],
+    'music-timer': ['A timer joins in.', 'Start one in Clock and watch it count down.'],
+    'three': ['Multiple Activities.', 'Control your music, watch a timer and stay ahead of your next meeting, all at the same time.'],
+    'three-calendar-open': ['Never late again.', 'Get a heads-up before every appointment, and join the call straight from DynamicMenu.'],
+    'calendar-open': ['Never late again.', 'Get a heads-up before every appointment, and join the call straight from DynamicMenu.'],
+    'task': ['Third party apps, too.', 'Give your app its own place on the pill.'],
+    'task-open': ['Build your own controls.', 'Add custom buttons and actions to your app’s activity. <a href="https://github.com/markolko-447/DynamicMenu#show-your-own-apps-activity" target="_blank" rel="noopener">See how, on GitHub</a>.'],
+    'transfer': ['Files on their way.', 'Follow every download and AirDrop transfer as it happens, without opening a window.'],
+    'dz0': ['Drag a file toward it…', 'Bring it to the top of your screen.'],
+    'shelf4': ['…and it’s on the Shelf.', 'Drag it out again whenever you need it.'],
+    'airpods': ['Your AirPods.', 'Their battery level shows up as soon as they connect, and again when you unlock.'],
+    'volume': ['Volume and brightness.', 'See the level right on the pill.'],
+    'wifi': ['Wi-Fi, VPN and Hotspot.', 'You know the moment your connection changes.'],
+    'privacy': ['Camera and microphone.', 'The pill lights up whenever either one is in use.'],
+    'battery': ['Power, at a glance.', 'Charging, low battery and Low Power Mode.'],
+    'caps': ['And the little things.', 'Caps Lock and the other small moments you would otherwise miss.'],
+    'idle-away': ['Then it steps aside.', 'Nothing going on? It leaves your menu bar alone.'],
+  };
+  const story = document.getElementById('story');
+  const storyVideo = story.querySelector('video');
+  const monitor = story.querySelector('.monitor');
+  const caption = story.querySelector('.caption');
+  const bezel = story.querySelector('.bezel');
+  // One recorded run for an external display, one for a MacBook's notch. The switch in
+  // the navigation chooses; the choice is remembered.
+  const runs = { display: 'story', macbook: 'story-notch' };
+  const frames = { display: ['assets/display.svg?r=4', 1541], macbook: ['assets/laptop.svg?r=8', 1316] };
+  let device = 'display';
+  try { device = localStorage.getItem('device') === 'macbook' ? 'macbook' : 'display'; } catch {}
+  let run = null, shown = -1, desired = 0, target = 0, seeking = false, waitCaption = 0;
+
+  const progress = () => {
+    const range = story.offsetHeight - innerHeight;
+    return range > 0 ? Math.min(0.9999, Math.max(0, -story.getBoundingClientRect().top / range)) : 0;
+  };
+  function seek() {
+    if (seeking || Math.abs(storyVideo.currentTime - target) < 1 / 120) return;
+    seeking = true;
+    storyVideo.currentTime = target;
+  }
+  // A caption appears when the video has reached its frame, not before: a long
+  // scroll leaves the video seeking, and the words would run ahead of the picture.
+  function showCaption(i) {
+    shown = i;
+    [...caption.children].forEach((el, j) => el.classList.toggle('on', j === i));
+  }
+  function syncCaption() {
+    if (desired === shown) return;
+    if (shown < 0 || (!seeking && Math.abs(storyVideo.currentTime - target) < 0.25)) {
+      clearTimeout(waitCaption); showCaption(desired);
+    } else {
+      clearTimeout(waitCaption);
+      waitCaption = setTimeout(() => { if (desired !== shown) showCaption(desired); }, 700);   // never stuck
+    }
+  }
+  storyVideo.addEventListener('seeked', () => { seeking = false; seek(); syncCaption(); });
+  function update() {
+    if (!run) return;
+    const { unique, duration } = run;
+    const f = progress() * unique.length, i = Math.floor(f), within = f - i;
+    const start = unique[i].time;
+    const end = (unique[i + 1]?.time ?? duration) - 0.05;
+    target = start + within * (end - start);
+    // Turned while the Mac powers on; as it unlocks the display swings round
+    // to face you, eased, and stays centred on the top of the screen.
+    const unlock = unique.findIndex(m => m.state === 'unlock');
+    const turn = unlock < 0 ? 1 : Math.min(1, Math.max(0, f - unlock));
+    const eased = turn * turn * (3 - 2 * turn);
+    monitor.style.setProperty('--t', (1 - eased).toFixed(4));
+    seek();
+    desired = i;
+    syncCaption();
+  }
+  async function loadStory(next, keepPlace = false) {
+    const place = keepPlace ? progress() : null;
+    device = next;
+    story.dataset.device = next;
+    deviceMenu.dataset.value = next;
+    deviceButton.setAttribute('aria-label', next === 'macbook' ? 'Showing a Mac with a notch. Change.' : 'Showing a standard display. Change.');
+    deviceList.querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.device === next)));
+    try { localStorage.setItem('device', next); } catch {}
+    bezel.src = frames[next][0];
+    bezel.setAttribute('height', frames[next][1]);
+    const name = runs[next];
+    storyVideo.src = `${MEDIA}/clips/${name}/sequence.mp4${REV}`;
+    const { duration, marks } = await fetch(`${MEDIA}/clips/${name}/sequence.json${REV}`).then(r => r.json());
+    if (device !== next) return;   // switched again while this was loading
+    // Each captioned state gets a scroll step the first time it appears; the
+    // frames in between (closing, settling) are scrubbed through on the way.
+    const seen = new Set();
+    const unique = marks.filter(m => captions[m.state] && !seen.has(m.state) && seen.add(m.state));
+    story.style.setProperty('--frames', unique.length);
+    caption.innerHTML = unique.map(m => `<span>${verb(captions[m.state][0])}<small>${captions[m.state][1]}</small></span>`).join('');
+    run = { unique, duration };
+    shown = -1; desired = 0;
+    if (place !== null) scrollTo(0, story.offsetTop + place * (story.offsetHeight - innerHeight));
+    update();
+  }
+  deviceList.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    setMenu(false);
+    if (b.dataset.device !== device) loadStory(b.dataset.device, true);
+  }));
+  let ticking = false;
+  addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { ticking = false; update(); });
+  }, { passive: true });
+  addEventListener('resize', update);
+  loadStory(device);
+
+  // ------------------------------------------------------------------ Reveal
+  const io = new IntersectionObserver(entries => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }, { rootMargin: '0px 0px -10% 0px' });
+  document.querySelectorAll('.reveal').forEach(el => { if (!el.closest('.nav')) io.observe(el); });
+})();
+</script>
+</body>
+</html>

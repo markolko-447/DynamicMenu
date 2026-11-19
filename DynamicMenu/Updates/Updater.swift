@@ -10,7 +10,7 @@ import SwiftUI
 /// that verifies each download live in the app's Info.plist (`SUFeedURL` and
 /// `SUPublicEDKey`), so nothing here needs to know about either.
 @Observable
-final class Updater: NSObject, SPUStandardUserDriverDelegate {
+final class Updater: NSObject, SPUStandardUserDriverDelegate, SPUUpdaterDelegate {
     static let shared = Updater()
 
     /// False while a check is already running.
@@ -30,7 +30,7 @@ final class Updater: NSObject, SPUStandardUserDriverDelegate {
     override private init() {
         super.init()
         controller = SPUStandardUpdaterController(
-            startingUpdater: true, updaterDelegate: nil, userDriverDelegate: self)
+            startingUpdater: true, updaterDelegate: self, userDriverDelegate: self)
         let updater = controller.updater
         canCheck = updater.canCheckForUpdates
         automaticallyChecks = updater.automaticallyChecksForUpdates
@@ -44,8 +44,22 @@ final class Updater: NSObject, SPUStandardUserDriverDelegate {
         ]
     }
 
-    /// Starts Sparkle. Call once the app has launched.
-    func start() {}
+    /// Call once the app has launched.
+    func start() {
+        #if DEBUG
+        // For testing an update against a feed on this Mac. Release builds
+        // cannot be pointed anywhere but the real feed.
+        if ProcessInfo.processInfo.environment["DYNAMICMENU_CHECK_NOW"] != nil {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { self.checkForUpdates() }
+        }
+        #endif
+    }
+
+    #if DEBUG
+    func feedURLString(for updater: SPUUpdater) -> String? {
+        ProcessInfo.processInfo.environment["DYNAMICMENU_FEED_URL"]
+    }
+    #endif
 
     func checkForUpdates() {
         controller.checkForUpdates(nil)

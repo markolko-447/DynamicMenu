@@ -34,6 +34,14 @@ struct SettingsView: View {
 private struct GeneralSettings: View {
     @Bindable private var settings = AppSettings.shared
     private var permissions = Permissions.shared
+    @Bindable private var updater = Updater.shared
+
+    private static var versionText: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let build = info?["CFBundleVersion"] as? String ?? "1"
+        return "\(version) (\(build))"
+    }
 
     var body: some View {
         Form {
@@ -60,6 +68,13 @@ private struct GeneralSettings: View {
                     Text("Reserve Menu Bar Space")
                     Text("On a Mac with a notch, keeps menu bar icons from sitting under the pill while an activity is showing. This does not apply to the menus of the frontmost app.")
                 }
+            }
+
+            Section("Updates") {
+                Toggle("Check for Updates Automatically", isOn: $updater.automaticallyChecks)
+                Button("Check for Updates…") { updater.checkForUpdates() }
+                    .disabled(!updater.canCheck)
+                LabeledContent("Version", value: Self.versionText)
             }
 
             Section {

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>DynamicMenu</title>
+    <link>https://markolko-447.github.io/DynamicMenu/appcast.xml</link>
+    <description>Updates for DynamicMenu.</description>
+    <language>en</language>
+  </channel>
+</rss>

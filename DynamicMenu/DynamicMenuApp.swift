@@ -27,6 +27,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ActivityCenter.shared.start()
         FileDragMonitor.shared.start()
         ScreenManager.shared.start()
+        Updater.shared.start()
         showPermissionsOnFirstLaunch()
     }
 
@@ -47,6 +48,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 private struct StatusMenu: View {
     @Environment(\.openSettings) private var openSettings
     private var screens = ScreenManager.shared
+    private var updater = Updater.shared
 
     var body: some View {
         // Each display's mode and appearance, one submenu per display.
@@ -68,6 +70,9 @@ private struct StatusMenu: View {
             openSettings()
         }
         .keyboardShortcut(",")
+
+        Button("Check for Updates…") { updater.checkForUpdates() }
+            .disabled(!updater.canCheck)
 
         Divider()
 

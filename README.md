@@ -54,6 +54,8 @@ as important.
 ## Privacy
 
 Everything stays on your Mac. DynamicMenu doesn't send your data anywhere and has no analytics.
+The only thing it fetches is a small update file from this project's website, and you can turn
+that off in Settings.
 
 ## Known limits
 

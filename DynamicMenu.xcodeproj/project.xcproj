@@ -10,6 +10,15 @@
       "Base",
     ],
   },
+  "packages": [
+    {
+      "kind": "remote",
+      "repository": "https://github.com/sparkle-project/Sparkle",
+      "version": {
+        "up-to-next-major-version": "2.10.1",
+      },
+    },
+  ],
   "files": [
     { "kind": "folder", "path": "DynamicMenu", "target-membership": [ "DynamicMenu" ] },
     {
@@ -31,6 +40,13 @@
         "frameworks",
         "resources",
       ],
+      "package-product-members": [
+        {
+          "package": "Sparkle",
+          "product-name": "Sparkle",
+          "build-phase": { "build-phase": "frameworks" },
+        },
+      ],
       "build-settings": {
         "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
         "ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME": "AccentColor",
@@ -48,6 +64,7 @@
         "INFOPLIST_KEY_NSAppleEventsUsageDescription": "DynamicMenu uses this to add songs to Favourites or mark them Suggest Less in Music from the pill.",
         "INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription": "DynamicMenu shows your next event in the pill shortly before it starts.",
         "INFOPLIST_KEY_NSHumanReadableCopyright": "",
+        "INFOPLIST_FILE": "Config/Updates.plist",
         "LD_RUNPATH_SEARCH_PATHS": [
           "$(inherited)",
           "@executable_path/../Frameworks",
